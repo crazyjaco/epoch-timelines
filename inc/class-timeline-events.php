@@ -53,8 +53,8 @@ class Class_Timeline_Events {
 						'with_front' => false,
 					), /* you can specify its url slug */
 				'has_archive'           => false, /* you can rename the slug here */
-				'capability_type'       => 'post',
-				'hierarchical'          => false,
+				'capability_type'       => 'page',
+				'hierarchical'          => true,
 				/* the next one is important, it tells what's enabled in the post editor */
 				'supports' => array(
 						'title',
