@@ -3,6 +3,7 @@
 
 class Class_Timeline_Events {
 	private static $instance = false;
+	private $timeline_post_type = 'et_events';
 
 	public static function instance(){
 		if ( ! self::$instance ) {
@@ -12,9 +13,8 @@ class Class_Timeline_Events {
 	}
 
 	function __construct() {
-		add_action( 'init', array( $this, 'create_cpt_et_events' ) );
-		//add_action( 'wp_head', array( $this, 'set_custom_css_in_header' ) );
-		//add_action( 'publish_msfw-custom-css', array( $this, 'set_custom_css_transient' ), 10, 2 );
+		add_action( 'init',           array( $this, 'create_cpt_et_events' ) );
+		add_action( 'add_meta_boxes', array( $this, 'et_add_timeline_select_meta_box' ) );
 	}
 	/**
 	 * Create the Timeline 'Event' custom post type
@@ -22,7 +22,7 @@ class Class_Timeline_Events {
 	 */
 	function create_cpt_et_events() {
 		// creating (registering) the custom type
-		register_post_type( 'et_events', /* (http://codex.wordpress.org/Function_Reference/register_post_type) */
+		register_post_type( $this->timeline_post_type, /* (http://codex.wordpress.org/Function_Reference/register_post_type) */
 		 	// let's now add all the options for this post type
 			array(
 				'labels' => array(
@@ -54,19 +54,53 @@ class Class_Timeline_Events {
 					), /* you can specify its url slug */
 				'has_archive'           => false, /* you can rename the slug here */
 				'capability_type'       => 'page',
-				'hierarchical'          => true,
+				'hierarchical'          => false,
 				/* the next one is important, it tells what's enabled in the post editor */
 				'supports' => array(
 						'title',
 						'editor',
 						'excerpt',
-						'custom-fields',
 						'sticky',
 					)
 			) /* end of options */
 		); /* end of register post type */
 
 	} // end function create_cpt_et_events
+
+	// http://justintadlock.com/archives/2013/10/07/post-relationships-parent-to-child
+	function et_add_timeline_select_meta_box(){
+		add_meta_box(
+			'timeline_meta_box',
+			'Timeline',
+			array( $this, 'render_mb_timeline_select_contents' ),
+			$this->timeline_post_type,
+			'side',
+			'core'
+		);
+	}
+
+	// http://justintadlock.com/archives/2013/10/07/post-relationships-parent-to-child
+	function render_mb_timeline_select_contents( $post ){
+		$parents = get_posts(
+			array(
+				'post_type'   => 'et_timelines',
+				'orderby'     => 'title',
+				'order'       => 'ASC',
+				'numberposts' => -1,
+			)
+		);
+
+		if ( ! empty( $parents ) ) {
+
+			echo '<select name="parent_id" class="widefat">';
+
+			foreach ( $parents as $parent ) {
+				printf( '<option value="%s"%s>%s</option>', esc_attr( $parent->ID ), selected( $parent->ID, $post->post_parent, false ), esc_html( $parent->post_title ) );
+			}
+
+			echo '</select>';
+		}
+	}
 
 } // end Class_Timeline_Events
 Class_Timeline_Events::instance();
