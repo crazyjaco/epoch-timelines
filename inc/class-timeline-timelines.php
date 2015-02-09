@@ -15,8 +15,10 @@ class Class_Timeline_Timelines {
 		add_action( 'init',                       array( $this, 'create_cpt_et_timelines' ) );
 		add_action( 'add_meta_boxes',             array( $this, 'et_add_timeline_meta_box' ) );
 		add_action( 'save_post',                  array( $this, 'et_save_timeline' ) );
-		add_action( 'admin_enqueue_scripts',      array( $this, 'et_enqueue_scripts_styles' ) );
+		add_action( 'admin_enqueue_scripts',      array( $this, 'et_enqueue_admin_scripts_styles' ) );
+		add_action( 'wp_enqueue_scripts' ,        array( $this, 'et_enqueue_scripts_styles' ) );
 		add_action( 'wp_ajax_update_event_order', array( $this, 'ajax_update_event_order' ) );
+		add_shortcode( 'timeline', array( $this, 'render_timeline_shortcode' ) );		
 	}
 
 	/**
@@ -70,7 +72,7 @@ class Class_Timeline_Timelines {
 
 	} // end function create_cpt_et_events
 
-	function et_enqueue_scripts_styles( $hook_suffix ){
+	function et_enqueue_admin_scripts_styles( $hook_suffix ){
 		global $post_type;
 
 		if ( ! in_array( $hook_suffix, array( 'post-new.php', 'post.php' ) ) ) {
@@ -86,6 +88,10 @@ class Class_Timeline_Timelines {
 		wp_enqueue_style( 'et-timelines-css', plugins_url( '../css/epoch-timelines.css', __FILE__ ) );
 		//wp_enqueue_style( 'wp-jquery-ui' );
 		//wp_enqueue_style( 'apm-jquery-custom-ui', plugins_url( '/css/smoothness/jquery-ui-1.8.14.custom.css' , __FILE__ ) );
+	}
+
+	function et_enqueue_scripts_styles() {
+		wp_enqueue_style( 'et-timelines-css', plugins_url( '../css/epoch-timelines.css', __FILE__ ) );
 	}
 
 	function et_add_timeline_meta_box( $post_type ) {
@@ -175,6 +181,28 @@ class Class_Timeline_Timelines {
 		}
 
 	} // end function ajax_update_event_order
+
+	function render_timeline_shortcode( $atts ){
+		$timeline_output = '';
+		$events = get_children(array(
+			'post_parent' => $atts['id'],
+			'post_type'   => 'et_events',
+			'post_status' => 'publish',
+			'orderby'     => 'menu_order',
+			'order'       => 'ASC',
+		) );
+
+		$timeline_output .= sprintf( '<ul class="et-event-list" id="%d">', $post->ID );
+		foreach ( $events as $event ){
+			$timeline_output .= sprintf( '<li class="et-event-item" id="event_%d"><span class="et-event-title">%s</span></li>', $event->ID, $event->post_title );
+		}
+
+		$timeline_output .= '</ul>';
+
+		return $timeline_output;
+
+	} // end function render_timeline_shortcode
+
 
 } // end Class_Timeline_Timelines
 Class_Timeline_Timelines::instance();

@@ -11,12 +11,13 @@ li.et-event-item {
 	border-top: lightgrey;
 	border-top-style: dashed;
 	border-top-width: thin;
+	list-style-type: none;
 	margin-top: 0;
 	margin-bottom: 0;
 	margin-left: 15px;
 	padding-bottom: 10px;
 	padding-left: 10px;
-	padding-top: 10px;	
+	padding-top: 10px;
 }
 
 li.et-event-item::before {
@@ -30,7 +31,8 @@ li.et-event-item::before {
 	border-style: solid;
 	border-width: 4px;
 	content: '';
-	left: 5px;
+	//left: 5px;
+	margin-left: -39px;
 }
 
 .draggable-ui-icon::before {

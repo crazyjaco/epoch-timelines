@@ -100,7 +100,7 @@ class Class_Timeline_Events {
 
 			echo '</select>';
 		}
-	}
+	} // end function render_mb_timeline_select_contents
 
 } // end Class_Timeline_Events
 Class_Timeline_Events::instance();
