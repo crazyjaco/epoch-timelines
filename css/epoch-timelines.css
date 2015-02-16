@@ -1,0 +1,46 @@
+ul.et-event-list {
+	border-left-width: 4px;
+	border-left-color: black;
+	border-left-style: solid;
+}
+
+li.et-event-item {
+	border-left: blue;
+	border-left-style: solid;
+	border-left-width: 3px;
+	border-top: lightgrey;
+	border-top-style: dashed;
+	border-top-width: thin;
+	list-style-type: none;
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: 15px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+	padding-top: 10px;
+}
+
+li.et-event-item::before {
+	background-color: white;
+	display: block;
+	position: absolute;
+	height: 10px;	
+	width: 10px;	
+	border-color: black;
+	border-radius: 50%;
+	border-style: solid;
+	border-width: 4px;
+	content: '';
+	//left: 5px;
+	margin-left: -39px;
+}
+
+.draggable-ui-icon::before {
+	background-position: -128px -48px;
+	background-image: url('../images/smoothness-ui-icons_888888_256x240.png');
+	content: '';
+	display: inline-block;
+	margin-right: 15px;
+	width: 15px;
+	height: 15px;
+}
