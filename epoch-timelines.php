@@ -5,6 +5,7 @@ Plugin Name: Epoch Timelines
 Description: Create timelines of events and epochs in WordPress
 Author: Crazy Jaco
 Author URI: http://github.com/crazyjaco
+Version: 1.0.1
 */
 
 

@@ -3,7 +3,7 @@ Contributors: Crazy Jaco
 Tags: epoch, timeline, calendar, time
 Requires at least: 4.1
 Tested up to: 4.1
-Stable tag: trunk
+Stable tag: 1.0.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ The `##` signifies the post ID of the timeline you wish to display.
 
 
 == Changelog ==
+
+= 1.0.1 = 
+* Fix for versioning issue
 
 = 1.0 =
 * First release version
