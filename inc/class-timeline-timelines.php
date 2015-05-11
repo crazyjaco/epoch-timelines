@@ -182,7 +182,31 @@ class Class_Timeline_Timelines {
 
 	} // end function ajax_update_event_order
 
+	/**
+	 * Prep the timeline id from the shortcode and pass off to be rendered
+	 * @param  array $atts All attributes passed in to shortcode
+	 * @return
+	 */
 	function render_timeline_shortcode( $atts ){
+		if ( isset( $atts['id'] ) ) {
+			$timeline_id = $atts['id'];
+			$this->render_timeline( $timeline_id );
+		} elseif ( in_the_loop() ) {
+			$timeline_id = get_the_ID();
+			$this->render_timeline( $timeline_id );
+		} else {
+			echo 'Please select a timeline.';
+		}
+
+	} // end function render_timeline_shortcode
+
+	/**
+	 * Generate the output markup for a single timeline of events
+	 * @param  num    $post_id ID of timeline
+	 * @param  bool   $echo    true = echo output; false = return output
+	 * @return string          timeline markup
+	 */
+	function render_timeline( $post_id, $echo = true ) {
 		$timeline_output = '';
 		$events = get_children(array(
 			'post_parent' => $atts['id'],
@@ -199,9 +223,13 @@ class Class_Timeline_Timelines {
 
 		$timeline_output .= '</ul>';
 
-		return $timeline_output;
+		if ( $echo ) {
+			echo $timeline_output;
+		} else {
+			return $timeline_output;
+		}
 
-	} // end function render_timeline_shortcode
+	}
 
 
 } // end Class_Timeline_Timelines

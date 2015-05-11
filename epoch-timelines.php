@@ -17,3 +17,4 @@ if ( ! defined( 'WPINC' ) ) {
 // Include core plugin class
 require plugin_dir_path( __FILE__ ) . 'inc/class-timeline-timelines.php';
 require plugin_dir_path( __FILE__ ) . 'inc/class-timeline-events.php';
+require plugin_dir_path( __FILE__ ) . 'inc/class-widget-timeline-timelines.php';
