@@ -12,12 +12,15 @@ class Class_Timeline_Timelines {
 	}
 
 	function __construct() {
-		add_action( 'init',                       array( $this, 'create_cpt_et_timelines' ) );
-		add_action( 'add_meta_boxes',             array( $this, 'et_add_timeline_meta_box' ) );
-		add_action( 'save_post',                  array( $this, 'et_save_timeline' ) );
-		add_action( 'admin_enqueue_scripts',      array( $this, 'et_enqueue_admin_scripts_styles' ) );
-		add_action( 'wp_enqueue_scripts' ,        array( $this, 'et_enqueue_scripts_styles' ) );
-		add_action( 'wp_ajax_update_event_order', array( $this, 'ajax_update_event_order' ) );
+		add_action( 'init',                         array( $this, 'create_cpt_et_timelines' ) );
+		add_action( 'add_meta_boxes',               array( $this, 'et_add_timeline_meta_box' ) );
+		add_action( 'save_post',                    array( $this, 'et_save_timeline' ) );
+		add_action( 'admin_enqueue_scripts',        array( $this, 'et_enqueue_admin_scripts_styles' ) );
+		add_action( 'wp_enqueue_scripts' ,          array( $this, 'et_enqueue_scripts_styles' ) );
+		add_action( 'media_buttons' ,               array( $this, 'et_add_timeline_button_to_editor' ) );
+		add_action( 'admin_footer',                 array( $this, 'et_timeline_selector_admin_footer' ) );	
+		add_action( 'wp_ajax_update_event_order',   array( $this, 'ajax_update_event_order' ) );
+		add_action( 'wp_ajax_update_timeline_list', array( $this, 'ajax_update_timeline_list') );
 		add_shortcode( 'timeline', array( $this, 'render_timeline_shortcode' ) );		
 	}
 
@@ -57,7 +60,7 @@ class Class_Timeline_Timelines {
 						'slug'       => 'timeline',
 						'with_front' => false,
 					), /* you can specify its url slug */
-				'has_archive'           => false, /* you can rename the slug here */
+				'has_archive'           => true, /* you can rename the slug here */
 				'capability_type'       => 'page',
 				'hierarchical'          => false,
 				/* the next one is important, it tells what's enabled in the post editor */
@@ -80,18 +83,48 @@ class Class_Timeline_Timelines {
 		}
 
 		if ( ! ( $this->timeline_post_type === $post_type ) ) {
+			// These apply across all custom post types except Timelines
+			//wp_enqueue_style( 'wp-jquery-ui-dialog' );
+			wp_enqueue_script( 'jquery-ui-dialog' );
+			wp_enqueue_style( 'et-jquery-custom-ui', plugins_url( '../css/smoothness/jquery-ui-1.8.14.custom.css' , __FILE__ ) );
+			wp_enqueue_style( 'et-modal-css', plugins_url('../css/epoch-timelines-modal.css', __FILE__ ) );
+			wp_enqueue_script('et-timeline-selector-modal', plugins_url( '../js/et-timeline-selector-modal.js', __FILE__ ), array( 'jquery-ui-dialog', 'jquery' ), '1.0', true );
 			return;
 		}
 
+		// These only apply if on the timeline edit or new timeline page
 		wp_enqueue_script( 'jquery-ui-sortable' );
-		wp_enqueue_script( 'et-timelines-js', plugins_url( '../js/epoch-timelines.js', __FILE__ ), array( 'jquery-ui-sortable', 'jquery' ), '1.0', true );
+		wp_enqueue_script( 'et-timelines-admin-js', plugins_url( '../js/epoch-timelines-admin.js', __FILE__ ), array( 'jquery-ui-sortable', 'jquery' ), '1.0', true );
 		wp_enqueue_style( 'et-timelines-css', plugins_url( '../css/epoch-timelines.css', __FILE__ ) );
-		//wp_enqueue_style( 'wp-jquery-ui' );
-		//wp_enqueue_style( 'apm-jquery-custom-ui', plugins_url( '/css/smoothness/jquery-ui-1.8.14.custom.css' , __FILE__ ) );
+
 	}
 
 	function et_enqueue_scripts_styles() {
 		wp_enqueue_style( 'et-timelines-css', plugins_url( '../css/epoch-timelines.css', __FILE__ ) );
+		wp_enqueue_script( 'et-timelines-js', plugins_url( '../js/epoch-timelines.js', __FILE__ ), array( 'jquery' ), '1.0', true );
+	}
+
+	function et_add_timeline_button_to_editor( $editor_id = "content" ) {
+		static $instance = 0;
+		$instance++;
+
+		$post = get_post();
+		if ( ! $post && ! empty( $GLOBALS['post_ID'] ) )
+			$post = $GLOBALS['post_ID'];
+
+		$img = '<span class="wp-media-buttons-icon"></span> ';
+
+		$id_attribute = $instance === 1 ? ' id="insert-timeline-button"' : '';
+		printf( '<a href="#"%s class="button insert-timeline" data-editor="%s" title="%s">%s</a>',
+			$id_attribute,
+			esc_attr( $editor_id ),
+			esc_attr__( 'Add Timeline' ),
+			$img . __( 'Add Timeline' )
+		);
+	} // end function et_add_timeline_button_to_editor
+
+	function et_timeline_selector_admin_footer() {
+		include plugin_dir_path( __FILE__ ) . '../interface/timeline-modal.php';
 	}
 
 	function et_add_timeline_meta_box( $post_type ) {
@@ -182,6 +215,10 @@ class Class_Timeline_Timelines {
 
 	} // end function ajax_update_event_order
 
+	function ajax_update_timeline_list() {
+
+	} // end function ajax_update_timeline_list
+
 	/**
 	 * Prep the timeline id from the shortcode and pass off to be rendered
 	 * @param  array $atts All attributes passed in to shortcode
@@ -208,20 +245,23 @@ class Class_Timeline_Timelines {
 	 */
 	function render_timeline( $post_id, $echo = true ) {
 		$timeline_output = '';
+		$count  = 0;
 		$events = get_children(array(
-			'post_parent' => $atts['id'],
+			'post_parent' => $post_id,
 			'post_type'   => 'et_events',
 			'post_status' => 'publish',
 			'orderby'     => 'menu_order',
 			'order'       => 'ASC',
 		) );
 
-		$timeline_output .= sprintf( '<ul class="et-event-list" id="%d">', $post->ID );
+		$timeline_output .= sprintf( '<div class="et-event-list" id="%d">', $post_id );
 		foreach ( $events as $event ){
-			$timeline_output .= sprintf( '<li class="et-event-item" id="event_%d"><span class="et-event-title">%s</span></li>', $event->ID, $event->post_title );
+			$align = ( $count % 2 ) == 0 ? 'et-align-left' : 'et-align-right';
+			$timeline_output .= sprintf( '<div class="et-event-item %s" id="event_%d"><span class="et-event-title">%s</span></div>', $align, $event->ID, $event->post_title );
+			$count++;
 		}
 
-		$timeline_output .= '</ul>';
+		$timeline_output .= '</div>';
 
 		if ( $echo ) {
 			echo $timeline_output;
