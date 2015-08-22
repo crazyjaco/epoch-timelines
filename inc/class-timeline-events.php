@@ -13,8 +13,10 @@ class Class_Timeline_Events {
 	}
 
 	function __construct() {
-		add_action( 'init',           array( $this, 'create_cpt_et_events' ) );
-		add_action( 'add_meta_boxes', array( $this, 'et_add_timeline_select_meta_box' ) );
+		add_action( 'init',                  array( $this, 'create_cpt_et_events' ) );
+		add_action( 'add_meta_boxes',        array( $this, 'et_add_timeline_select_meta_box' ) );
+		
+		//add_action( 'admin_enqueue_scripts', array( $this, 'et_enqueue_admin_scripts_styles' ) );
 	}
 	/**
 	 * Create the Timeline 'Event' custom post type
@@ -52,7 +54,7 @@ class Class_Timeline_Events {
 						'slug'       => 'event',
 						'with_front' => false,
 					), /* you can specify its url slug */
-				'has_archive'           => false, /* you can rename the slug here */
+				'has_archive'           => true, /* you can rename the slug here */
 				'capability_type'       => 'page',
 				'hierarchical'          => false,
 				/* the next one is important, it tells what's enabled in the post editor */
