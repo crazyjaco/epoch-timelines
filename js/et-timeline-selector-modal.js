@@ -10,12 +10,14 @@ jQuery( document ).ready( function(){
 	// });
 	
 	jQuery('#et-timelines-modal').dialog({
-		autoOpen: true,
+		autoOpen: false,
 		height: 400,
 		width: 640,
 		modal: false,
-		title: 'Select Product',
+		title: 'Select Timeline',
+		dialogClass: 'et-timeline-dialog',
 		open: function() {
+			jQuery(this).dialog('moveToTop');
 			//$(this).scrollTop(0);
 			//$('#apm_search_query').focus();
 		},
@@ -30,11 +32,26 @@ jQuery( document ).ready( function(){
 
 	});
 
+	// Do what needs to be done to open dialog
 	var openTimelineSelector = function( e ) {
 		e.preventDefault();
 		jQuery('#et-timelines-modal').dialog('open');
 	}
 
+	var selectTimeline = function( e ) {
+		e.preventDefault();
+		//var selected = '';
+		//selected = tinyMCE.activeEditor.selection.getContent();
+		var shortcode = '[timeline id=' + this.dataset.postId + ']';
+		console.log( this.dataset.postId );
+		tinymce.execCommand('mceInsertContent', false, shortcode );
+		jQuery('#et-timelines-modal').dialog('close');
+	}
+
+	// Open dialog when clicking the Add Timeline button
 	jQuery('#insert-timeline-button').on('click', openTimelineSelector );
+
+	// When a timeline in the dialog is selected, do stuff
+	jQuery("#et-timelines-results").on('click', 'li', selectTimeline );
 
 });
