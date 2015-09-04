@@ -1,6 +1,43 @@
 div#et-timelines-modal {
-/*	position: fixed;
-	top: 20px;
-	left: 70px;
-	display: none;*/
+	display: none;
+}
+
+/* expanded editor tools is set to 1000 in core */
+
+div.ui-dialog.et-timeline-dialog {
+	z-index: 1020 !important ;
+}
+
+.ui-widget-overlay {
+	z-index: 1010;
+}
+
+#et-timelines-results {
+	border: 1px #dfdfdf solid;
+	margin: 0 0 5px 0;
+	background: #fff;
+	overflow: auto;
+	position: relative;
+}
+
+#et-timelines-results li.odd {
+	background-color: #F9F9F9;
+}
+
+#et-timelines-results li {
+	clear: both;
+	margin-bottom: 0;
+	border-bottom: 1px solid #f1f1f1;
+	color: #333;
+	padding: 4px 6px;
+	position: relative;
+}
+
+#et-timelines-results a, #et-timelines-results a:hover {
+	text-decoration: none;
+}
+
+#et-timelines-results li:hover {
+	background: #eaf2fa;
+	color: #151515;
 }
