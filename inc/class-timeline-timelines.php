@@ -271,6 +271,27 @@ class Class_Timeline_Timelines {
 
 	}
 
+function get_timeline_listing(){
+	$timelines = array();
+	$args = array(
+		'posts_per_page'   => 10,
+		'offset'           => 0,
+//		'orderby'          => 'date',
+//		'order'            => 'DESC',
+		'post_type'        => $this->timeline_post_type,
+		'post_status'      => 'publish',
+	);
+	$timeline_array = get_posts( $args );
+
+	foreach ( $timeline_array as $item ) {
+		$timelines[ $item->ID ] = $item->post_title;
+	}
+
+	error_log( print_r( $timeline_array, true ) );
+
+	return $timelines;
+}
+
 
 } // end Class_Timeline_Timelines
 Class_Timeline_Timelines::instance();
