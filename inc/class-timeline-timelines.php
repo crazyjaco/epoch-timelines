@@ -66,7 +66,6 @@ class Class_Timeline_Timelines {
 				/* the next one is important, it tells what's enabled in the post editor */
 				'supports' => array(
 						'title',
-						'editor',
 						'excerpt',
 						'sticky',
 					)
@@ -194,9 +193,14 @@ class Class_Timeline_Timelines {
 			'orderby'     => 'menu_order',
 			'order'       => 'ASC',
 		) );
+		$count = 0;
+		printf( '<span>Click and drag events to reorder the timeline.</span>' );
 		printf( '<ul class="et-event-list" id="%d">', $post->ID );
 		foreach ( $events as $event ){
-			printf( '<li class="et-event-item" id="event_%d"><span class="et-event-title draggable-ui-icon">%s</span></li>', $event->ID, $event->post_title );
+			// Determine odd/even for zebra striping rows
+			$zebra = ( 0 ==$count % 2 ) ? '' : ' odd';
+			printf( '<li class="et-event-item %s" id="event_%d"><span class="et-event-title draggable-ui-icon">%s</span></li>', $zebra, $event->ID, $event->post_title );
+			$count++;
 		}
 		?>
 		</ul>
