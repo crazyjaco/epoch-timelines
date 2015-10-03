@@ -157,7 +157,7 @@ class Class_Timeline_Timelines {
 		if ( $this->timeline_post_type == $post_type ) {
 			add_meta_box(
 				'timeline_meta_box',
-				__( 'Timeline', 'epoch-timeline' ),
+				__( 'Reorder Timeline', 'epoch-timeline' ),
 				array( $this, 'render_timeline_meta_box_contents' ),
 				$this->timeline_post_type,
 				'advanced',
