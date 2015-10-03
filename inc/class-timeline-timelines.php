@@ -2,7 +2,7 @@
 
 class Class_Timeline_Timelines {
 	private static $instance = false;
-	private $timeline_post_type = 'et_timelines';
+	public $timeline_post_type = 'et_timelines';
 
 	public static function instance(){
 		if ( ! self::$instance ) {
@@ -104,8 +104,16 @@ class Class_Timeline_Timelines {
 	}
 
 	function et_add_timeline_button_to_editor( $editor_id = "content" ) {
+		global $post_type;
 		static $instance = 0;
 		$instance++;
+		$class_timeline_events = '';
+		$class_timeline_events = Class_Timeline_Events::instance();
+
+		// Show on all post types except the timelines and events
+		if ( ( $post_type === $this->timeline_post_type || $post_type === $class_timeline_events->get_post_type() ) ) {
+			return;
+		}
 
 		$post = get_post();
 		if ( ! $post && ! empty( $GLOBALS['post_ID'] ) )
@@ -123,8 +131,22 @@ class Class_Timeline_Timelines {
 	} // end function et_add_timeline_button_to_editor
 
 	function et_timeline_selector_admin_footer() {
-		include plugin_dir_path( __FILE__ ) . '../interface/timeline-modal.php';
-	}
+		global $post_type;
+		$class_timeline_events = '';
+		$class_timeline_events = Class_Timeline_Events::instance();
+
+		// Check the page context and kick out if not an edit screen
+		$hook_suffix = $GLOBALS['hook_suffix'];
+		if ( ! in_array( $hook_suffix, array( 'post-new.php', 'post.php' ) ) ) {
+			return;
+		}
+
+		// Show on all post types except the timelines and events
+		if ( ! ( $post_type === $this->timeline_post_type || $post_type === $class_timeline_events->get_post_type() ) ) {
+			include plugin_dir_path( __FILE__ ) . '../interface/timeline-modal.php';
+		}
+	
+	} // end function et_timeline_selector_admin_footer
 
 	function et_add_timeline_meta_box( $post_type ) {
 
@@ -193,12 +215,12 @@ class Class_Timeline_Timelines {
 			'orderby'     => 'menu_order',
 			'order'       => 'ASC',
 		) );
-		$count = 0;
+		$count = 1;
 		printf( '<span>Click and drag events to reorder the timeline.</span>' );
 		printf( '<ul class="et-event-list" id="%d">', $post->ID );
 		foreach ( $events as $event ){
 			// Determine odd/even for zebra striping rows
-			$zebra = ( 0 ==$count % 2 ) ? '' : ' odd';
+			$zebra = ( 0 ==$count % 2 ) ? '' : 'odd';
 			printf( '<li class="et-event-item %s" id="event_%d"><span class="et-event-title draggable-ui-icon">%s</span></li>', $zebra, $event->ID, $event->post_title );
 			$count++;
 		}
