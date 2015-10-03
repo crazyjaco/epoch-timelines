@@ -3,7 +3,7 @@
 
 class Class_Timeline_Events {
 	private static $instance = false;
-	private $timeline_post_type = 'et_events';
+	public $timeline_post_type = 'et_events';
 
 	public static function instance(){
 		if ( ! self::$instance ) {
@@ -18,6 +18,11 @@ class Class_Timeline_Events {
 		
 		//add_action( 'admin_enqueue_scripts', array( $this, 'et_enqueue_admin_scripts_styles' ) );
 	}
+
+	public function get_post_type(){
+		return $this->timeline_post_type;
+	}
+
 	/**
 	 * Create the Timeline 'Event' custom post type
 	 * @return [type] [description]
