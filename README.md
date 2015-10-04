@@ -21,3 +21,4 @@ FUTURE VERSIONS:
 - Add style specificity for drag n drop meta box styles (div.et-reorder-mb ul)
 - Create cpt template for timelines
 - Force Timeline widgets to be in-line instead at the top of the post/container.
+- A Better build process- Exclude asset folder, etc; Copy to Dist folder
