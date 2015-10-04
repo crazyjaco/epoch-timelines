@@ -5,10 +5,6 @@ A WordPress Plugin for creating custom timelines of events
 - Recurring items?
 
 TODO:
-+ Fix modal styling so X isn't off center
-+ Fix styling in drag n drop area of Edit Timeline 
-+ Remove modal from loading on Timeline and Event post types
-+ Remove Add Timeline button from Timeline and Event post types
 
 
 FUTURE VERSIONS:
