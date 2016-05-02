@@ -1,37 +1,68 @@
 <?php
+/**
+ * Class Timeline Timelines
+ *
+ * @link       https://wordpress.org/plugins/epoch-timelines/
+ * @since      1.0.0
+ *
+ * @package    epoch-timelines
+ * @subpackage epoch-timelines/inc
+ */
 
+/**
+ * Class handline the Timeline custom post type.
+ */
 class Class_Timeline_Timelines {
+	/**
+	 * Instance of the class; False if not instantiated yet.
+	 *
+	 * @var boolean
+	 */
 	private static $instance = false;
+
+	/**
+	 * String constant containing name of the custom post type.
+	 *
+	 * @var string
+	 */
 	public $timeline_post_type = 'et_timelines';
 
-	public static function instance(){
+
+	/**
+	 * Instantiates the Singleton if not already done and return it.
+	 *
+	 * @return obj  Instance of this class; false on failure
+	 */
+	public static function instance() {
 		if ( ! self::$instance ) {
 			self::$instance = new Class_Timeline_Timelines;
 		}
 		return self::$instance;
 	}
 
+	/**
+	 * Class constructor
+	 */
 	function __construct() {
 		add_action( 'init',                         array( $this, 'create_cpt_et_timelines' ) );
 		add_action( 'add_meta_boxes',               array( $this, 'et_add_timeline_meta_box' ) );
 		add_action( 'save_post',                    array( $this, 'et_save_timeline' ) );
 		add_action( 'admin_enqueue_scripts',        array( $this, 'et_enqueue_admin_scripts_styles' ) );
 		add_action( 'wp_enqueue_scripts' ,          array( $this, 'et_enqueue_scripts_styles' ) );
-		add_action( 'media_buttons' ,               array( $this, 'et_add_timeline_button_to_editor' ) );
-		add_action( 'admin_footer',                 array( $this, 'et_timeline_selector_admin_footer' ) );	
+		add_action( 'media_buttons',                array( $this, 'et_add_timeline_button_to_editor' ) );
+		add_action( 'admin_footer',                 array( $this, 'et_timeline_selector_admin_footer' ) );
 		add_action( 'wp_ajax_update_event_order',   array( $this, 'ajax_update_event_order' ) );
-		add_action( 'wp_ajax_update_timeline_list', array( $this, 'ajax_update_timeline_list') );
-		add_shortcode( 'timeline', array( $this, 'render_timeline_shortcode' ) );		
+		add_action( 'wp_ajax_update_timeline_list', array( $this, 'ajax_update_timeline_list' ) );
+		add_shortcode( 'timeline', array( $this, 'render_timeline_shortcode' ) );
 	}
 
 	/**
 	 * Create the 'Timeline' custom post type
-	 * @return [type] [description]
 	 */
 	function create_cpt_et_timelines() {
-		// creating (registering) the custom type
-		register_post_type( $this->timeline_post_type, /* (http://codex.wordpress.org/Function_Reference/register_post_type) */
-		 	// let's now add all the options for this post type
+		// Creating (registering) the custom type.
+		register_post_type( $this->timeline_post_type,
+		 	// Let's now add all the options for this post type.
 			array(
 				'labels' => array(
 						'name'               => __( 'Timeline',                       'epoch-timeline' ), /* This is the Title of the Group */
@@ -74,7 +105,13 @@ class Class_Timeline_Timelines {
 
 	} // end function create_cpt_et_events
 
-	function et_enqueue_admin_scripts_styles( $hook_suffix ){
+	/**
+	 * Enqueue any admin related scripts and stylesheets.
+	 *
+	 * @param  string $hook_suffix File name in the current page's url.
+	 * @return void
+	 */
+	function et_enqueue_admin_scripts_styles( $hook_suffix ) {
 		global $post_type;
 
 		if ( ! in_array( $hook_suffix, array( 'post-new.php', 'post.php' ) ) ) {
@@ -82,46 +119,58 @@ class Class_Timeline_Timelines {
 		}
 
 		if ( ! ( $this->timeline_post_type === $post_type ) ) {
-			// These apply across all custom post types except Timelines
-			//wp_enqueue_style( 'wp-jquery-ui-dialog' );
+			// These apply across all custom post types except Timelines.
+			// wp_enqueue_style( 'wp-jquery-ui-dialog' );
 			wp_enqueue_script( 'jquery-ui-dialog' );
 			wp_enqueue_style( 'et-jquery-custom-ui', plugins_url( '../css/smoothness/jquery-ui-1.8.14.custom.css' , __FILE__ ) );
-			wp_enqueue_style( 'et-modal-css', plugins_url('../css/epoch-timelines-modal.css', __FILE__ ) );
-			wp_enqueue_script('et-timeline-selector-modal', plugins_url( '../js/et-timeline-selector-modal.js', __FILE__ ), array( 'jquery-ui-dialog', 'jquery' ), '1.0', true );
+			wp_enqueue_style( 'et-modal-css', plugins_url( '../css/epoch-timelines-modal.css', __FILE__ ) );
+			wp_enqueue_script( 'et-timeline-selector-modal', plugins_url( '../js/et-timeline-selector-modal.js', __FILE__ ), array( 'jquery-ui-dialog', 'jquery' ), '1.0', true );
 			return;
 		}
 
-		// These only apply if on the timeline edit or new timeline page
+		// These only apply if on the timeline edit or new timeline page.
 		wp_enqueue_script( 'jquery-ui-sortable' );
 		wp_enqueue_script( 'et-timelines-admin-js', plugins_url( '../js/epoch-timelines-admin.js', __FILE__ ), array( 'jquery-ui-sortable', 'jquery' ), '1.0', true );
 		wp_enqueue_style( 'et-timelines-css', plugins_url( '../css/epoch-timelines.css', __FILE__ ) );
 
 	}
 
+	/**
+	 * Enqueue any client facing scripts and stylesheets.
+	 *
+	 * @return void
+	 */
 	function et_enqueue_scripts_styles() {
 		wp_enqueue_style( 'et-timelines-css', plugins_url( '../css/epoch-timelines.css', __FILE__ ) );
 		wp_enqueue_script( 'et-timelines-js', plugins_url( '../js/epoch-timelines.js', __FILE__ ), array( 'jquery' ), '1.0', true );
 	}
 
-	function et_add_timeline_button_to_editor( $editor_id = "content" ) {
+	/**
+	 * Add a button in the post editor to add a timeline to the post.
+	 *
+	 * @param  string $editor_id Identifier of editor instance on page.
+	 * @return void
+	 */
+	function et_add_timeline_button_to_editor( $editor_id = 'content' ) {
 		global $post_type;
 		static $instance = 0;
 		$instance++;
 		$class_timeline_events = '';
 		$class_timeline_events = Class_Timeline_Events::instance();
 
-		// Show on all post types except the timelines and events
+		// Show on all post types except the timelines and events.
 		if ( ( $post_type === $this->timeline_post_type || $post_type === $class_timeline_events->get_post_type() ) ) {
 			return;
 		}
 
 		$post = get_post();
-		if ( ! $post && ! empty( $GLOBALS['post_ID'] ) )
+		if ( ! $post && ! empty( $GLOBALS['post_ID'] ) ) {
 			$post = $GLOBALS['post_ID'];
+		}
 
 		$img = '<span class="wp-media-buttons-icon"></span> ';
 
-		$id_attribute = $instance === 1 ? ' id="insert-timeline-button"' : '';
+		$id_attribute = 1 === $instance ? ' id="insert-timeline-button"' : '';
 		printf( '<a href="#"%s class="button insert-timeline" data-editor="%s" title="%s">%s</a>',
 			$id_attribute,
 			esc_attr( $editor_id ),
@@ -135,19 +184,25 @@ class Class_Timeline_Timelines {
 		$class_timeline_events = '';
 		$class_timeline_events = Class_Timeline_Events::instance();
 
-		// Check the page context and kick out if not an edit screen
+		// Check the page context and kick out if not an edit screen.
 		$hook_suffix = $GLOBALS['hook_suffix'];
 		if ( ! in_array( $hook_suffix, array( 'post-new.php', 'post.php' ) ) ) {
 			return;
 		}
 
-		// Show on all post types except the timelines and events
+		// Show on all post types except the timelines and events.
 		if ( ! ( $post_type === $this->timeline_post_type || $post_type === $class_timeline_events->get_post_type() ) ) {
 			include plugin_dir_path( __FILE__ ) . '../interface/timeline-modal.php';
 		}
-	
+
 	} // end function et_timeline_selector_admin_footer
 
+	/**
+	 * Add meta box for event sorting to timeline edit screen.
+	 *
+	 * @param  string $post_type Post type of currently edited post.
+	 * @return null
+	 */
 	function et_add_timeline_meta_box( $post_type ) {
 
 		if ( ! is_admin() ) {
