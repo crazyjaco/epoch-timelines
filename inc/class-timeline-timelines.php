@@ -10,7 +10,7 @@
  */
 
 /**
- * Class handline the Timeline custom post type.
+ * Class handling the Timeline custom post type.
  */
 class Class_Timeline_Timelines {
 	/**
