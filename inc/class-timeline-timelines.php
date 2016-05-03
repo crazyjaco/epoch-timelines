@@ -179,6 +179,11 @@ class Class_Timeline_Timelines {
 		);
 	} // end function et_add_timeline_button_to_editor
 
+	/**
+	 * Add timeline selector modal to all non-timeline CPT edit screens.
+	 *
+	 * @return void
+	 */
 	function et_timeline_selector_admin_footer() {
 		global $post_type;
 		$class_timeline_events = '';
@@ -201,7 +206,7 @@ class Class_Timeline_Timelines {
 	 * Add meta box for event sorting to timeline edit screen.
 	 *
 	 * @param  string $post_type Post type of currently edited post.
-	 * @return null
+	 * @return void
 	 */
 	function et_add_timeline_meta_box( $post_type ) {
 
@@ -222,22 +227,22 @@ class Class_Timeline_Timelines {
 	} // end function et_add_timeline_meta_box
 
 	function et_save_timeline() {
-		// Check for nonce
+		// Check for nonce.
 		if ( ! isset( $_POST['timeline_nonce'] ) ) {
 			return;
 		}
 
-		// Verify nonce is valid
+		// Verify nonce is valid.
 		if ( ! wp_verify_nonce( $_POST['timeline_nonce'], 'myplugin_meta_box' ) ) {
 			return;
 		}
 
-		// Check if autosave and return if so
+		// Check if autosave and return if so.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
 		}
 
-		// Check user permissions
+		// Check user permissions.
 		if ( isset( $_POST['post_type'] ) && 'page' == $_POST['post_type'] ) {
 
 			if ( ! current_user_can( 'edit_page', $post_id ) ) {
@@ -250,20 +255,26 @@ class Class_Timeline_Timelines {
 			}
 		}
 
-		// Verify data is set
+		// Verify data is set.
 		if ( ! isset( $_POST['myplugin_new_field'] ) ) {
 			return;
 		}
 
-		// Sanitize input
+		// Sanitize input.
 
-		// Update post meta
+		// Update post meta.
 		update_post_meta( $post_id, '_my_meta_value_key', $my_data );
 
 	} // end function et_save_timeline
 
+	/**
+	 * Render event reordering meta box.
+	 *
+	 * @param  object $post Object representing the current post.
+	 * @return void
+	 */
 	function render_timeline_meta_box_contents( $post ) {
-		$events = get_children(array(
+		$events = get_children( array(
 			'post_parent' => $post->ID,
 			'post_type'   => 'et_events',
 			'post_status' => 'publish',
@@ -272,11 +283,16 @@ class Class_Timeline_Timelines {
 		) );
 		$count = 1;
 		printf( '<span>Click and drag events to reorder the timeline.</span>' );
-		printf( '<ul class="et-event-list" id="%d">', $post->ID );
-		foreach ( $events as $event ){
-			// Determine odd/even for zebra striping rows
-			$zebra = ( 0 ==$count % 2 ) ? '' : 'odd';
-			printf( '<li class="et-event-item %s" id="event_%d"><span class="et-event-title draggable-ui-icon">%s</span></li>', $zebra, $event->ID, $event->post_title );
+		printf( '<ul class="et-event-list" id="%d">', esc_attr( $post->ID ) );
+		foreach ( $events as $event ) {
+			// Determine odd/even for zebra striping rows.
+			$zebra = ( 0 === $count % 2 ) ? '' : 'odd';
+			printf(
+				'<li class="et-event-item %s" id="event_%d"><span class="et-event-title draggable-ui-icon">%s</span></li>',
+				esc_attr( $zebra ),
+				esc_attr( $event->ID ),
+				esc_html( $event->post_title )
+			);
 			$count++;
 		}
 		?>
@@ -284,6 +300,11 @@ class Class_Timeline_Timelines {
 		<?php
 	} // end function render_timeline_meta_box_contents
 
+	/**
+	 * Ajax callback for updating the order of events.
+	 *
+	 * @return void
+	 */
 	function ajax_update_event_order() {
 		$ordered_events = $_POST['event'];
 		error_log( print_r( $ordered_events, true ) );
@@ -301,11 +322,12 @@ class Class_Timeline_Timelines {
 	} // end function ajax_update_timeline_list
 
 	/**
-	 * Prep the timeline id from the shortcode and pass off to be rendered
-	 * @param  array $atts All attributes passed in to shortcode
-	 * @return
+	 * Prep the timeline id from the shortcode and pass off to be rendered.
+	 *
+	 * @param  array $atts All attributes passed in to shortcode.
+	 * @return void
 	 */
-	function render_timeline_shortcode( $atts ){
+	function render_timeline_shortcode( $atts ) {
 		if ( isset( $atts['id'] ) ) {
 			$timeline_id = $atts['id'];
 			$this->render_timeline( $timeline_id );
@@ -319,15 +341,16 @@ class Class_Timeline_Timelines {
 	} // end function render_timeline_shortcode
 
 	/**
-	 * Generate the output markup for a single timeline of events
-	 * @param  num    $post_id ID of timeline
-	 * @param  bool   $echo    true = echo output; false = return output
-	 * @return string          timeline markup
+	 * Generate the output markup for a single timeline of events.
+	 *
+	 * @param  num  $post_id ID of timeline.
+	 * @param  bool $echo    true = echo output; false = return output.
+	 * @return string          timeline markup.
 	 */
 	function render_timeline( $post_id, $echo = true ) {
 		$timeline_output = '';
 		$count  = 0;
-		$events = get_children(array(
+		$events = get_children( array(
 			'post_parent' => $post_id,
 			'post_type'   => 'et_events',
 			'post_status' => 'publish',
@@ -336,7 +359,7 @@ class Class_Timeline_Timelines {
 		) );
 
 		$timeline_output .= sprintf( '<div class="et-event-list" id="%d">', $post_id );
-		foreach ( $events as $event ){
+		foreach ( $events as $event ) {
 			$align = ( $count % 2 ) == 0 ? 'et-align-left' : 'et-align-right';
 			$timeline_output .= sprintf( '<div class="et-event-item %s" id="event_%d"><span class="et-event-title">%s</span></div>', $align, $event->ID, $event->post_title );
 			$count++;
@@ -352,27 +375,31 @@ class Class_Timeline_Timelines {
 
 	}
 
-function get_timeline_listing(){
-	$timelines = array();
-	$args = array(
-		'posts_per_page'   => 10,
-		'offset'           => 0,
-//		'orderby'          => 'date',
-//		'order'            => 'DESC',
-		'post_type'        => $this->timeline_post_type,
-		'post_status'      => 'publish',
-	);
-	$timeline_array = get_posts( $args );
+	/**
+	 * Return an array of published timelines.
+	 *
+	 * @return array Listing of published timelines.
+	 */
+	function get_timeline_listing() {
+		$timelines = array();
+		$args = array(
+			'posts_per_page'   => 10,
+			'offset'           => 0,
+			// 'orderby'          => 'date',.
+			// 'order'            => 'DESC',.
+			'post_type'        => $this->timeline_post_type,
+			'post_status'      => 'publish',
+		);
+		$timeline_array = get_posts( $args );
 
-	foreach ( $timeline_array as $item ) {
-		$timelines[ $item->ID ] = $item->post_title;
+		foreach ( $timeline_array as $item ) {
+			$timelines[ $item->ID ] = $item->post_title;
+		}
+
+		error_log( print_r( $timeline_array, true ) );
+
+		return $timelines;
 	}
-
-	error_log( print_r( $timeline_array, true ) );
-
-	return $timelines;
-}
-
-
 } // end Class_Timeline_Timelines
+
 Class_Timeline_Timelines::instance();
