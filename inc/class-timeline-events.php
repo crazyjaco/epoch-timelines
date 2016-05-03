@@ -1,36 +1,72 @@
 <?php
-// TODO: Make Events heirarchical?
+/**
+ * Class Timeline Events
+ *
+ * @link       https://wordpress.org/plugins/epoch-timelines/
+ * @since      1.0.0
+ *
+ * @package    epoch-timelines
+ * @subpackage epoch-timelines/inc
+ */
 
+/**
+ * Class handling the Timeline Event custom post type.
+ */
 class Class_Timeline_Events {
+	/**
+	 * Instance of the class; False if not instantiated yet.
+	 *
+	 * @var boolean
+	 */
 	private static $instance = false;
+
+	/**
+	 * String constant containing name of the custom post type.
+	 *
+	 * @var string
+	 */
 	public $timeline_post_type = 'et_events';
 
-	public static function instance(){
+	/**
+	 * Instantiates the Singleton if not already done and return it.
+	 *
+	 * @return obj  Instance of this class; false on failure
+	 */
+	public static function instance() {
 		if ( ! self::$instance ) {
 			self::$instance = new Class_Timeline_Events;
 		}
 		return self::$instance;
 	}
 
+	/**
+	 * Class constructor
+	 */
 	function __construct() {
 		add_action( 'init',                  array( $this, 'create_cpt_et_events' ) );
 		add_action( 'add_meta_boxes',        array( $this, 'et_add_timeline_select_meta_box' ) );
-		
-		//add_action( 'admin_enqueue_scripts', array( $this, 'et_enqueue_admin_scripts_styles' ) );
+
+		/* add_action( 'admin_enqueue_scripts', array( $this, 'et_enqueue_admin_scripts_styles' ) ); */
 	}
 
-	public function get_post_type(){
+	/**
+	 * Retrieve the post type for this class.
+	 *
+	 * @return string Post Type for this class.
+	 */
+	public function get_post_type() {
 		return $this->timeline_post_type;
 	}
 
 	/**
 	 * Create the Timeline 'Event' custom post type
-	 * @return [type] [description]
+	 *
+	 * @return void
 	 */
 	function create_cpt_et_events() {
-		// creating (registering) the custom type
-		register_post_type( $this->timeline_post_type, /* (http://codex.wordpress.org/Function_Reference/register_post_type) */
-		 	// let's now add all the options for this post type
+		// Creating (registering) the custom type.
+		register_post_type( $this->timeline_post_type,
+		 	// Let's now add all the options for this post type.
 			array(
 				'labels' => array(
 						'name'               => __( 'Timeline Event',                 'epoch-timeline' ), /* This is the Title of the Group */
@@ -74,8 +110,14 @@ class Class_Timeline_Events {
 
 	} // end function create_cpt_et_events
 
-	// http://justintadlock.com/archives/2013/10/07/post-relationships-parent-to-child
-	function et_add_timeline_select_meta_box(){
+	/**
+	 * Add meta box for timeline selector.
+	 * Based on post found here:
+	 * http://justintadlock.com/archives/2013/10/07/post-relationships-parent-to-child
+	 *
+	 * @return void
+	 */
+	function et_add_timeline_select_meta_box() {
 		add_meta_box(
 			'timeline_meta_box',
 			'Timeline',
@@ -86,8 +128,15 @@ class Class_Timeline_Events {
 		);
 	}
 
-	// http://justintadlock.com/archives/2013/10/07/post-relationships-parent-to-child
-	function render_mb_timeline_select_contents( $post ){
+	/**
+	 * Meta box callback to render the form for the timeline selector
+	 * Based on post found here:
+	 * http://justintadlock.com/archives/2013/10/07/post-relationships-parent-to-child
+	 *
+	 * @param  object $post Post object for currently edited Timeline event.
+	 * @return void
+	 */
+	function render_mb_timeline_select_contents( $post ) {
 		$parents = get_posts(
 			array(
 				'post_type'   => 'et_timelines',
@@ -110,4 +159,5 @@ class Class_Timeline_Events {
 	} // end function render_mb_timeline_select_contents
 
 } // end Class_Timeline_Events
+
 Class_Timeline_Events::instance();
